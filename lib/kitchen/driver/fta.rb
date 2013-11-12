@@ -21,7 +21,7 @@ module Kitchen
 
       def verify(state)
         super
-
+      ensure
         executeSSH(state) do |conn|
           download_path(config[:remote_results_source], config[:local_results_destination], conn)
           run_remote("rm -rf results", conn)

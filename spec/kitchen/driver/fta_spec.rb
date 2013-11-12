@@ -79,6 +79,26 @@ describe Kitchen::Driver::Fta do
     end
 
     it { should be_true }
+
+    context "failure in super" do
+      it "should still download" do
+
+        @counter = 0
+        Kitchen::SSH.should_receive(:new).exactly(2).times.and_return do
+          @counter += 1
+          raise Kitchen::ActionFailed.new("") if @counter == 1
+          @mock_ssh_connection
+        end
+
+        @mock_ssh_connection.should_receive(:download_path!).with("serverspec_results.xml", ".")
+        @mock_ssh_connection.should_receive(:exec) { |cmd|
+          expect(cmd).to include("rm -rf results")
+        }
+        @mock_ssh_connection.should_receive(:shutdown)
+
+        expect{fta_driver.verify({})}.to raise_error(Kitchen::ActionFailed)
+      end
+    end
   end
 
   describe "#setup" do
