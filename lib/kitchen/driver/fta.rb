@@ -5,6 +5,11 @@ module Kitchen
 
     class Fta < Kitchen::Driver::SSHBase
 
+      attr_reader :config
+
+      default_config :remote_results_source, "serverspec_results.xml"
+      default_config :local_results_destination, "."
+
       def create(state)
         puts "Ignoring Create"
       end
@@ -18,7 +23,7 @@ module Kitchen
         super
 
         executeSSH(state) do |conn|
-          download_path("results", "tmp", conn)
+          download_path(config[:remote_results_source], config[:local_results_destination], conn)
           run_remote("rm -rf results", conn)
         end
       end

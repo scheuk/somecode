@@ -13,6 +13,29 @@ describe Kitchen::Driver::Fta do
     Kitchen::Driver::Fta.new(config)
   }
 
+  describe "#config" do
+
+    subject {
+      fta_driver.config
+    }
+
+    its(:to_hash) { should include(:remote_results_source => "serverspec_results.xml") }
+    its(:to_hash) { should include(:local_results_destination => ".") }
+
+    context "override keys" do
+      let (:config) {
+        {
+            :remote_results_source => "some_other.xml",
+            :local_results_destination => "some_other_destination"
+        }
+      }
+
+      its(:to_hash) { should include(:remote_results_source => "some_other.xml") }
+      its(:to_hash) { should include(:local_results_destination => "some_other_destination") }
+    end
+
+  end
+
   [:create, :destroy].each do |method|
     describe "##{method}" do
       subject { fta_driver.send(method, nil) }
@@ -45,7 +68,7 @@ describe Kitchen::Driver::Fta do
         @mock_ssh_connection
       }.exactly(2).times
 
-      @mock_ssh_connection.should_receive(:download_path!).with("results", "tmp")
+      @mock_ssh_connection.should_receive(:download_path!).with("serverspec_results.xml", ".")
       @mock_ssh_connection.should_receive(:exec) { |cmd|
         expect(cmd).to include("rm -rf results")
       }
@@ -61,7 +84,7 @@ describe Kitchen::Driver::Fta do
   describe "#setup" do
 
     let(:config) {
-      {busser_root:"some_busser_root"}
+      {busser_root: "some_busser_root"}
     }
     it "should setup yarjuf" do
 
