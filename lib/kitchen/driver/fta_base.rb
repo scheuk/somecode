@@ -58,15 +58,15 @@ module Kitchen
       end
 
       def gem_bin
-        File.join(ruby_bin_path(), 'gem')
+        File.join(ruby_bin_path, 'gem')
       end
 
       def ruby_bin_path
-        config.fetch(:ruby_binpath, "/opt/chef/embedded/bin")
+        busser[:ruby_bindir]
       end
 
       def busser_root
-        config.fetch(:busser_root, "/tmp/kitchen-busser")
+        busser[:root_path]
       end
 
       def sandbox_env(export=false)

@@ -1,8 +1,32 @@
 require 'ostruct'
 describe Kitchen::Driver::Fta do
 
+  BUSSER_ROOT = "/some/busser/path"
+  RUBY_BIN = "/some/ruby/bin/path"
+
   before {
     @mock_ssh_connection = double("ssh_connection")
+
+    fta_driver.instance = double("instance mock")
+    fta_driver.instance.stub(:logger) { mock_logger }
+    fta_driver.instance.stub(:busser) { mock_busser }
+
+    mock_busser.stub(:[]).with(:root_path) {
+      BUSSER_ROOT
+    }
+    mock_busser.stub(:[]).with(:ruby_bindir) {
+      RUBY_BIN
+    }
+
+    mock_logger.stub(:info) { true }
+  }
+
+  let(:mock_logger) {
+    double("mock logger")
+  }
+
+  let(:mock_busser) {
+    double("mock busser")
   }
 
   let(:config) {
@@ -96,16 +120,17 @@ describe Kitchen::Driver::Fta do
         }
         @mock_ssh_connection.should_receive(:shutdown)
 
-        expect{fta_driver.verify({})}.to raise_error(Kitchen::ActionFailed)
+        expect { fta_driver.verify({}) }.to raise_error(Kitchen::ActionFailed)
       end
     end
   end
 
   describe "#setup" do
 
-    let(:config) {
-      {busser_root: "some_busser_root"}
+    before {
+
     }
+
     it "should setup yarjuf" do
 
       Kitchen::SSH.should_receive(:new) {
@@ -113,9 +138,9 @@ describe Kitchen::Driver::Fta do
       }.exactly(2).times
 
       @mock_ssh_connection.should_receive(:exec) { |cmd|
-        expect(cmd).to include("/opt/chef/embedded/bin/gem install yarjuf --no-rdoc --no-ri")
-        expect(cmd).to include("BUSSER_ROOT=some_busser_root")
-        expect(cmd).to include("GEM_HOME=some_busser_root/gems")
+        expect(cmd).to include("#{RUBY_BIN}/gem install yarjuf --no-rdoc --no-ri")
+        expect(cmd).to include("BUSSER_ROOT=#{BUSSER_ROOT}")
+        expect(cmd).to include("GEM_HOME=#{BUSSER_ROOT}/gems")
         expect(cmd).to include("GEM_PATH=$GEM_HOME")
         expect(cmd).to include("GEM_CACHE=$GEM_HOME/cache")
         expect(cmd).to include("PATH=$PATH:$GEM_HOME/bin")
