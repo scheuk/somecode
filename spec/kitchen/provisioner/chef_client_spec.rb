@@ -1,27 +1,40 @@
 require 'ostruct'
 describe Kitchen::Provisioner::ChefClient do
 
-  let(:config) {
-    nil
+  let(:config) { Hash.new }
+  let(:logger_io) { StringIO.new }
+  let(:instance_logger) { Kitchen::Logger.new(:logdev => logger_io) }
+  let(:instance_suite) {stub(:name => "suite_name")}
+  let(:instance) {
+    stub(:name => "coolbeans", :logger => instance_logger, :suite => "blah")
   }
 
-  let(:chef_client) { Kitchen::Provisioner::ChefClient.new(OpenStruct.new({logger: nil}), config) }
+  let(:chef_client) do
+    p = Kitchen::Provisioner::ChefClient.new(config)
+    #p.instance = instance
+    p
+  end
 
-  [:create_sandbox, :install_command].each do |method|
-    describe "##{method}" do
-      subject {chef_client.send(method)}
+  describe "#create_sandbox" do
 
-      it { should be_nil }
+    it "should not be empty" do
+      chef_client.create_sandbox.should_not be_nil
     end
+
+  end
+
+  describe "#install_command" do
+
+    it "sould be empty" do
+      chef_client.install_command.should be_nil
+    end
+
   end
 
   describe "#run_command" do
 
     subject { chef_client.run_command }
 
-    let(:log_level) {
-      "some_log_level"
-    }
 
     context "with sudo" do
       let(:config) {

@@ -8,7 +8,7 @@ module Kitchen
     class ChefClient < ChefBase
 
       def create_sandbox
-        puts "Ignoring Create Sandbox"
+        create_chef_sandbox
       end
 
       def install_command
