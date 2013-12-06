@@ -8,7 +8,13 @@ module Kitchen
     class ChefClient < ChefBase
 
       def create_sandbox
-        create_chef_sandbox
+        @tmpdir = Dir.mktmpdir("#{instance.name}-sandbox-")
+        File.chmod(0755, @tmpdir)
+        info("Preparing files for transfer")
+        debug("Creating local sandbox in #{tmpdir}")
+
+        yield if block_given?
+        tmpdir
       end
 
       def install_command
