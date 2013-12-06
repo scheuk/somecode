@@ -27,6 +27,9 @@ module Kitchen
     class SSHBase
       default_config :remote_results_source, "serverspec_results.xml"
       default_config :local_results_destination, "."
+      default_config :chef_handler_json_source, "/var/chef/reports"
+      default_config :chef_handler_json_source_file_mask, "chef-run-report-*.json"
+      default_config :check_for_idempotency, false
     end
 
     module FtaBase
@@ -37,9 +40,17 @@ module Kitchen
         super
       ensure
         executeSSH(state) do |conn|
+          #puts conn.class
+          run_remote("#{sudo} chmod -R 755 #{config[:chef_handler_json_source]}", conn)
+          download_path(config[:chef_handler_json_source], config[:local_results_destination], conn)
+
           download_path(config[:remote_results_source], config[:local_results_destination], conn)
           run_remote("rm -rf results", conn)
         end
+      end
+
+      def sudo
+        config[:sudo] ? "sudo -E " : ""
       end
 
       def executeSSH(state)
