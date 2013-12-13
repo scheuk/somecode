@@ -1,3 +1,5 @@
+require 'json'
+
 module Kitchen
 
   class SSH
@@ -28,7 +30,6 @@ module Kitchen
       default_config :remote_results_source, "serverspec_results.xml"
       default_config :local_results_destination, "."
       default_config :chef_handler_json_source, "/var/chef/reports"
-      default_config :chef_handler_json_source_file_mask, "chef-run-report-*.json"
       default_config :check_for_idempotency, false
     end
 
@@ -38,15 +39,79 @@ module Kitchen
 
       def verify(state)
         super
+
+        if (config[:check_for_idempotency])
+
+          converge(state)
+          super
+
+          executeSSH(state) do |conn|
+            run_remote("#{sudo} chmod -R 755 #{config[:chef_handler_json_source]}", conn)
+            download_path(config[:chef_handler_json_source], config[:local_results_destination], conn)
+          end
+
+          latest_chef_run_file = "#{Dir.pwd}/reports/#{find_latest_chef_run(Dir.entries("#{Dir.pwd}/reports"))}"
+          puts "Inspecting #{latest_chef_run_file} for idempotency"
+          raise "Idempotency Failed!!!" unless verify_idempotency(latest_chef_run_file)
+        end
+
       ensure
         executeSSH(state) do |conn|
-          #puts conn.class
-          run_remote("#{sudo} chmod -R 755 #{config[:chef_handler_json_source]}", conn)
-          download_path(config[:chef_handler_json_source], config[:local_results_destination], conn)
-
           download_path(config[:remote_results_source], config[:local_results_destination], conn)
           run_remote("rm -rf results", conn)
         end
+      end
+
+      def verify_idempotency(chef_run_file_path)
+        if (chef_run_file_path.nil?)
+          puts 'Could not parse chef run report for idempotency, no chef run json file exists, verify your chef run list includes recipe[chef_handler::json_file]'
+          return false
+        end
+
+        updated_resources = JSON.parse(File.open(chef_run_file_path, "r").read)['updated_resources']
+
+        if (updated_resources.nil?)
+          puts 'Could not parse chef run report for idempotency, it did not contain an updated_resources section'
+          return false
+        end
+
+        updated_resources = filter_out_json_file_resource(updated_resources)
+
+        puts "#{updated_resources.size()} updated resources (excluding json file handler resource)"
+
+        updated_resources.size == 0
+      rescue JSON::ParserError => e
+        puts "Could not parse chef run report for idempotency due to \"#{e}\""
+      end
+
+      def filter_out_json_file_resource(updated_resources)
+        updated_resources.select { |updated_resource|
+          !is_json_file_resource(updated_resource)
+        }
+      end
+
+      def is_json_file_resource(updated_resource)
+        updated_resource["instance_vars"]["recipe_name"] == "json_file" &&
+            updated_resource["instance_vars"]["resource_name"] == "chef_handler" &&
+            updated_resource["instance_vars"]["cookbook_name"] == "chef_handler" &&
+            updated_resource["instance_vars"]["source"] == "chef/handler/json_file.rb"
+      end
+
+      def find_latest_chef_run(entries)
+        found_chef_run = entries.map { |entry|
+          match = /chef-run-report-(?<time_entry>\d*).json/.match(entry)
+          {
+              time_entry: match[:time_entry].to_i,
+              file: entry
+
+          } unless match.nil?
+        }.select { |entry_map|
+          !entry_map.nil?
+        }.sort { |entry_map1, entry_map2|
+          entry_map1[:time_entry] <=> entry_map2[:time_entry]
+        }.reverse.first
+
+        found_chef_run[:file] unless found_chef_run.nil?
       end
 
       def sudo
