@@ -50,7 +50,7 @@ module Kitchen
             download_path(config[:chef_handler_json_source], config[:local_results_destination], conn)
           end
 
-          latest_chef_run_file = "#{Dir.pwd}/reports/#{find_latest_chef_run(Dir.entries("#{Dir.pwd}/reports"))}"
+          latest_chef_run_file = "#{config[:local_results_destination]}/reports/#{find_latest_chef_run(Dir.entries("#{config[:local_results_destination]}/reports"))}"
           puts "Inspecting #{latest_chef_run_file} for idempotency"
           raise "Idempotency Failed!!!" unless verify_idempotency(latest_chef_run_file)
         end
