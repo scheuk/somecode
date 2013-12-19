@@ -116,6 +116,7 @@ describe Kitchen::Driver::FtaBase do
 
     describe "no updated resources, filter out json file handler" do
       let(:mock_json_file_contents) {
+
         "{\"updated_resources\": [
           #{File.read("#{File.dirname(__FILE__)}/JsonFileResource.json")}
         ]}"

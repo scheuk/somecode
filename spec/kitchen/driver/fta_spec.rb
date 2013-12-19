@@ -60,13 +60,6 @@ describe Kitchen::Driver::Fta do
 
   end
 
-  [:create, :destroy].each do |method|
-    describe "##{method}" do
-      subject { fta_driver.send(method, nil) }
-      it { should be_true }
-    end
-  end
-
   describe "#create" do
     subject {
       fta_driver.create(nil)
@@ -76,11 +69,24 @@ describe Kitchen::Driver::Fta do
   end
 
   describe "#destroy" do
+    before {
+      Kitchen::SSH.should_receive(:new) {
+        @mock_ssh_connection
+      }.exactly(1).times
+
+      @mock_ssh_connection.should_receive(:exec) { |cmd|
+        expect(cmd).to include("rm -rf #{BUSSER_ROOT}")
+      }
+
+      @mock_ssh_connection.should_receive(:shutdown)
+    }
+
     subject {
-      fta_driver.destroy(nil)
+      fta_driver.destroy({})
     }
 
     it { should be_true }
+
   end
 
   describe "#verify" do

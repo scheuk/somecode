@@ -91,6 +91,8 @@ module Kitchen
       end
 
       def is_json_file_resource(updated_resource)
+
+        updated_resource.is_a?(Hash) &&
         updated_resource["instance_vars"]["recipe_name"] == "json_file" &&
             updated_resource["instance_vars"]["resource_name"] == "chef_handler" &&
             updated_resource["instance_vars"]["cookbook_name"] == "chef_handler" &&
@@ -128,7 +130,7 @@ module Kitchen
         super
 
         executeSSH(state) do |conn|
-          run_remote("#{sandbox_env} #{gem_bin} install yarjuf --no-rdoc --no-ri", conn)
+          run_remote("#{sandbox_env} #{sudo}#{gem_bin} install yarjuf --no-rdoc --no-ri", conn)
         end
 
       end

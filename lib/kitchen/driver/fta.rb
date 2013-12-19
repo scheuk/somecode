@@ -13,7 +13,10 @@ module Kitchen
       end
 
       def destroy(state)
-        puts "Ignoring Destroy"
+        executeSSH(state) do |conn|
+          run_remote("#{sudo} rm -rf #{busser_root}", conn)
+        end
+        puts "Destroyed #{busser_root} directory"
       end
 
     end
