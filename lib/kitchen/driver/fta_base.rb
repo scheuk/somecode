@@ -68,7 +68,8 @@ module Kitchen
           return false
         end
 
-        updated_resources = JSON.parse(File.open(chef_run_file_path, "r").read)['updated_resources']
+        contents = File.open(chef_run_file_path, "r").read
+        updated_resources = JSON.parse(contents)['updated_resources']
 
         if (updated_resources.nil?)
           puts 'Could not parse chef run report for idempotency, it did not contain an updated_resources section'
@@ -86,8 +87,14 @@ module Kitchen
 
       def filter_out_json_file_resource(updated_resources)
         updated_resources.select { |updated_resource|
-          !is_json_file_resource(updated_resource)
+          !is_json_file_resource(updated_resource) &&
+          !is_minitest_handler_cookbook(updated_resource)
         }
+      end
+
+      def is_minitest_handler_cookbook(updated_resource)
+        updated_resource.is_a?(Hash) &&
+        updated_resource['instance_vars']['cookbook_name'] == 'minitest-handler'
       end
 
       def is_json_file_resource(updated_resource)

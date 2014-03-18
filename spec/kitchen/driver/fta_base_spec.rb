@@ -125,6 +125,14 @@ describe Kitchen::Driver::FtaBase do
       it { should be_true }
     end
 
+    describe "no updated resources, filter out json file handler with minitest_handler updates" do
+      let(:mock_json_file_contents) {
+          File.read("#{File.dirname(__FILE__)}/minitest-handler-update.json")
+      }
+
+      it { should be_true }
+    end
+
     describe "updated resources" do
       let(:mock_json_file_contents) {
         '{"updated_resources": ["could_be_anything"]}'

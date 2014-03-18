@@ -1,0 +1,78 @@
+{
+    "updated_resources": [
+        {
+            "json_class": "Chef::Resource::Directory",
+            "instance_vars": {
+                "name": "delete minitest test location",
+                "noop": null,
+                "before": null,
+                "params": {
+                },
+                "provider": "Chef::Provider::Directory",
+                "allowed_actions": [
+                    "nothing",
+                    "create",
+                    "delete"
+                ],
+                "action": [
+                    "delete"
+                ],
+                "updated": true,
+                "updated_by_last_action": true,
+                "supports": {
+                },
+                "ignore_failure": false,
+                "retries": 0,
+                "retry_delay": 2,
+                "source_line": "/tmp/kitchen/cookbooks/minitest-handler/recipes/default.rb:50:in `block in from_file'",
+                "elapsed_time": 0.001120855,
+                "resource_name": "directory",
+                "path": "/var/chef/minitest",
+                "recursive": true,
+                "cookbook_name": "minitest-handler",
+                "recipe_name": "default",
+                "owner": "root",
+                "group": "root",
+                "mode": "0775"
+            }
+        },
+        {
+            "json_class": "Chef::Resource::ChefHandler",
+            "instance_vars": {
+                "name": "Chef::Handler::JsonFile",
+                "noop": null,
+                "before": null,
+                "params": {
+                },
+                "provider": null,
+                "allowed_actions": [
+                    "nothing",
+                    "enable",
+                    "disable"
+                ],
+                "action": [
+                    "nothing"
+                ],
+                "updated": true,
+                "updated_by_last_action": false,
+                "supports": {
+                    "report": true,
+                    "exception": true
+                },
+                "ignore_failure": false,
+                "retries": 0,
+                "retry_delay": 2,
+                "source_line": "/tmp/kitchen/cookbooks/chef_handler/recipes/json_file.rb:24:in `from_file'",
+                "elapsed_time": 0.00054867,
+                "resource_name": "chef_handler",
+                "cookbook_name": "chef_handler",
+                "recipe_name": "json_file",
+                "source": "chef/handler/json_file.rb",
+                "arguments": {
+                    "path": "/var/chef/reports"
+                },
+                "class_name": "Chef::Handler::JsonFile"
+            }
+        }
+    ]
+}
