@@ -37,6 +37,20 @@ module Kitchen
 
       attr_reader :config
 
+      def create(state)
+        super
+
+        unless (config[:post_create_commands].nil? || config[:post_create_commands].empty?)
+          executeSSH(state) do |conn|
+            config[:post_create_commands].each do |post_create_command|
+              cmd = "#{sudo} #{post_create_command}"
+              puts "-- Executing #{cmd}"
+              run_remote(cmd, conn)
+            end
+          end
+        end
+      end
+
       def verify(state)
         super
 
