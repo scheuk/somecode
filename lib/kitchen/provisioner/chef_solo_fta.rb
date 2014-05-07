@@ -16,7 +16,6 @@ module Kitchen
 
       def prepare_json
         override_attributes = config[:attributes][:_override_attributes]
-        config[:attributes].delete(:_override_attributes)
 
         super
 
