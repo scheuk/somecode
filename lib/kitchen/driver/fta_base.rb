@@ -31,6 +31,16 @@ module Kitchen
       default_config :local_results_destination, "."
       default_config :chef_handler_json_source, "/var/chef/reports"
       default_config :check_for_idempotency, false
+
+      def env_cmd(cmd)
+        env = "env"
+        env << " http_proxy=#{config[:http_proxy]}"   if config[:http_proxy]
+        env << " https_proxy=#{config[:https_proxy]}" if config[:https_proxy]
+        env << " LANG=#{config[:lang]}"  if config[:lang]
+
+        env == "env" ? cmd : "#{env} #{cmd}"
+      end
+
     end
 
     module FtaBase
