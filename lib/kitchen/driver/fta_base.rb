@@ -50,6 +50,9 @@ module Kitchen
       def create(state)
         super
 
+        puts 'Running Post Create Commands...'
+        puts "--- #{config}"
+
         unless (config[:post_create_commands].nil? || config[:post_create_commands].empty?)
           executeSSH(state) do |conn|
             config[:post_create_commands].each do |post_create_command|
@@ -161,6 +164,7 @@ module Kitchen
         executeSSH(state) do |conn|
           run_remote("#{sandbox_env} #{sudo}#{gem_bin} update --system", conn)
           run_remote("#{sandbox_env} #{sudo}#{gem_bin} install rspec --version '2.14' --no-rdoc --no-ri", conn)
+          run_remote("#{sandbox_env} #{sudo}#{gem_bin} install specinfra --no-rdoc --no-ri", conn)
           run_remote("#{sandbox_env} #{sudo}#{gem_bin} install yarjuf --no-rdoc --no-ri", conn)
         end
 
