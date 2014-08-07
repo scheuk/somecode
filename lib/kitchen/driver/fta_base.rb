@@ -162,7 +162,10 @@ module Kitchen
 
       def setup(state)
         executeSSH(state) do |conn|
-          run_remote("#{sandbox_env} #{sudo}#{gem_bin} install yarjuf --no-rdoc --no-ri", conn)
+          run_remote("#{sandbox_env} #{sudo}#{gem_bin} update --system", conn)
+          run_remote("#{sandbox_env} #{sudo}#{gem_bin} install rspec --version '2.14' --no-rdoc --no-ri", conn)
+          run_remote("#{sandbox_env} #{sudo}#{gem_bin} install specinfra --no-rdoc --no-ri", conn)
+          run_remote("#{sandbox_env} #{sudo}#{gem_bin} install yarjuf --version '1.0.6' --no-rdoc --no-ri", conn)
         end
 
         super
