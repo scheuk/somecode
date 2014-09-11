@@ -27,8 +27,8 @@ module Kitchen
   module Driver
 
     class SSHBase
-      default_config :remote_results_source, "serverspec_results.xml"
-      default_config :local_results_destination, "."
+      default_config :remote_results_source, "tmp/serverspec-results.xml"
+      default_config :local_results_destination, "tmp"
       default_config :chef_handler_json_source, "/var/chef/reports"
       default_config :check_for_idempotency, false
 
@@ -50,14 +50,14 @@ module Kitchen
       def create(state)
         super
 
-        puts 'Running Post Create Commands...'
-        puts "--- #{config}"
+        info('Running Post Create Commands...')
+        debug("--- #{config}")
 
         unless (config[:post_create_commands].nil? || config[:post_create_commands].empty?)
           executeSSH(state) do |conn|
             config[:post_create_commands].each do |post_create_command|
               cmd = "#{sudo} #{post_create_command}"
-              puts "-- Executing #{cmd}"
+              info("-- Executing #{cmd}")
               run_remote(cmd, conn)
             end
           end
@@ -162,9 +162,6 @@ module Kitchen
 
       def setup(state)
         executeSSH(state) do |conn|
-          run_remote("#{sandbox_env} #{sudo}#{gem_bin} update --system", conn)
-          run_remote("#{sandbox_env} #{sudo}#{gem_bin} install rspec --version '2.14' --no-rdoc --no-ri", conn)
-          run_remote("#{sandbox_env} #{sudo}#{gem_bin} install specinfra --no-rdoc --no-ri", conn)
           run_remote("#{sandbox_env} #{sudo}#{gem_bin} install yarjuf --version '1.0.6' --no-rdoc --no-ri", conn)
         end
 
